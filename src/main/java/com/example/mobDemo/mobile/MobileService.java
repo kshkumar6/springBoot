@@ -35,16 +35,9 @@ public class MobileService {
     }
 
     public ResponseEntity<Mobile> addNewMobile(Mobile mobile) {
-       /* Optional<Mobile> mobileByModelName = mobileRepository
-                .findMobileByModelName(mobile.getModelName());
-        Optional<Mobile> mobileBySellerName = mobileRepository
-                .findMobileBySellerName(mobile.getSellerName());
-
-
-         */
-        List<Mobile> mobileByModelName2 = mobileRepository.findAllByModelName(mobile.getModelName());
-       List<Mobile> mobileBySellerName2 = mobileRepository.findAllBySellerName(mobile.getSellerName());
-        if(mobileByModelName2.contains(mobile.getSellerName())){
+        Optional<Mobile> uniqueMobileEntry = mobileRepository
+                .findUniqueMobileEntry(mobile.getSellerName(),mobile.getModelName());
+        if(uniqueMobileEntry.isPresent()){
             throw new IllegalStateException("Mobile already present in DB");
         }
         return ResponseEntity.status(HttpStatus.OK).body(mobileRepository.save(mobile));
@@ -57,6 +50,7 @@ public class MobileService {
         }
         mobileRepository.deleteById(id);
     }
+
 @Transactional
     public void updateMobileDetails(Long id, String sellerName, int price) {
         Mobile mobile = mobileRepository.findById(id)
